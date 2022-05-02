@@ -1,6 +1,6 @@
 package io.hrushik09.betterreadsdataloader;
 
-import connection.DataStaxAstraProperties;
+import io.hrushik09.betterreadsdataloader.connection.DataStaxAstraProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.cassandra.CqlSessionBuilderCustomizer;

@@ -1,4 +1,4 @@
-package connection;
+package io.hrushik09.betterreadsdataloader.connection;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
