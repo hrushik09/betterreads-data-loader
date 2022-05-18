@@ -77,7 +77,7 @@ public class MainController {
                     // Construct the Book object
                     Book book = new Book();
 
-                    book.setId(jsonObject.getString("key").replace("/works", ""));
+                    book.setId(jsonObject.getString("key").replace("/works/", ""));
 
                     book.setName(jsonObject.optString("title"));
 
@@ -138,7 +138,7 @@ public class MainController {
 
     @PostConstruct
     public void start() {
-//        initAuthors();
-//        initWorks();
+        initAuthors();
+        initWorks();
     }
 }
