@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,9 +39,13 @@ public class MainController {
     private String worksDumpLocation;
 
     private void initAuthors() {
+        AtomicLong lineCount = new AtomicLong();
+        AtomicLong uploadLineCount = new AtomicLong();
+
         Path path = Paths.get(authorDumpLocation);
         try (Stream<String> lines = Files.lines(path)) {
             lines.forEach(line -> {
+                lineCount.getAndIncrement();
                 // Read and parse the line
                 String jsonString = line.substring(line.indexOf("{"));
                 try {
@@ -54,10 +59,14 @@ public class MainController {
 
                     // Persist using Repository
                     authorRepository.save(author);
+                    uploadLineCount.getAndIncrement();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
             });
+
+            System.out.println("Total " + lineCount + " authors found");
+            System.out.println("Total " + uploadLineCount + " authors uploaded");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -67,8 +76,12 @@ public class MainController {
         Path path = Paths.get(worksDumpLocation);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
 
+        AtomicLong lineCount = new AtomicLong();
+        AtomicLong uploadLineCount = new AtomicLong();
+
         try (Stream<String> lines = Files.lines(path)) {
             lines.forEach(line -> {
+                lineCount.getAndIncrement();
                 // Read and parse the line
                 String jsonString = line.substring(line.indexOf("{"));
                 try {
@@ -127,10 +140,14 @@ public class MainController {
 
                     // Persist using Repository
                     bookRepository.save(book);
+                    uploadLineCount.getAndIncrement();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
             });
+
+            System.out.println("Total " + lineCount + " works found");
+            System.out.println("Total " + uploadLineCount + " works uploaded");
         } catch (IOException e) {
             e.printStackTrace();
         }
