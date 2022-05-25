@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,20 +34,31 @@ public class MainController {
     @Autowired
     BookRepository bookRepository;
 
-    @Value("${datadump.location.author}")
+    @Value("${datadump.location.authors}")
     private String authorDumpLocation;
 
     @Value("${datadump.location.works}")
     private String worksDumpLocation;
 
+    @PostConstruct
+    public void start() {
+        initAuthors();
+//        initWorks();
+    }
+
     private void initAuthors() {
         AtomicLong lineCount = new AtomicLong();
         AtomicLong uploadLineCount = new AtomicLong();
+        AtomicLong errorLineCount = new AtomicLong();
 
         Path path = Paths.get(authorDumpLocation);
-        try (Stream<String> lines = Files.lines(path)) {
+        File file = new File("D:\\Coding\\BetterReads\\tempOutputForProcessedAuthorFiles.txt");
+        try (Stream<String> lines = Files.lines(path);
+             FileWriter writer = new FileWriter(file)) {
+
             lines.forEach(line -> {
                 lineCount.getAndIncrement();
+
                 // Read and parse the line
                 String jsonString = line.substring(line.indexOf("{"));
                 try {
@@ -59,29 +72,37 @@ public class MainController {
 
                     // Persist using Repository
                     authorRepository.save(author);
+                    System.out.println("saved " + author.getName());
                     uploadLineCount.getAndIncrement();
                 } catch (JSONException e) {
-                    throw new RuntimeException(e);
+                    errorLineCount.getAndIncrement();
                 }
             });
 
             System.out.println("Total " + lineCount + " authors found");
             System.out.println("Total " + uploadLineCount + " authors uploaded");
+            System.out.println("Total " + errorLineCount + " error lines found");
+
+            writer.write(authorDumpLocation + " was uploaded");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void initWorks() {
-        Path path = Paths.get(worksDumpLocation);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
 
         AtomicLong lineCount = new AtomicLong();
         AtomicLong uploadLineCount = new AtomicLong();
+        AtomicLong errorLineCount = new AtomicLong();
 
-        try (Stream<String> lines = Files.lines(path)) {
+        Path path = Paths.get(authorDumpLocation);
+        File file = new File("D:\\Coding\\BetterReads\\tempOutputForProcessedWorksFiles.txt");
+        try (Stream<String> lines = Files.lines(path);
+        FileWriter writer = new FileWriter(file)) {
             lines.forEach(line -> {
                 lineCount.getAndIncrement();
+
                 // Read and parse the line
                 String jsonString = line.substring(line.indexOf("{"));
                 try {
@@ -141,21 +162,18 @@ public class MainController {
                     // Persist using Repository
                     bookRepository.save(book);
                     uploadLineCount.getAndIncrement();
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
+                } catch (JSONException | RuntimeException e) {
+                    errorLineCount.getAndIncrement();
                 }
             });
 
             System.out.println("Total " + lineCount + " works found");
             System.out.println("Total " + uploadLineCount + " works uploaded");
+            System.out.println("Total " + errorLineCount + " error lines found");
+
+            writer.write(worksDumpLocation + " was uploaded");
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @PostConstruct
-    public void start() {
-        initAuthors();
-        initWorks();
     }
 }
