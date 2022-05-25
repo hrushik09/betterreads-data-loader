@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,7 +20,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,18 +44,10 @@ public class MainController {
     }
 
     private void initAuthors() {
-        AtomicLong lineCount = new AtomicLong();
-        AtomicLong uploadLineCount = new AtomicLong();
-        AtomicLong errorLineCount = new AtomicLong();
-
         Path path = Paths.get(authorDumpLocation);
-        File file = new File("D:\\Coding\\BetterReads\\tempOutputForProcessedAuthorFiles.txt");
-        try (Stream<String> lines = Files.lines(path);
-             FileWriter writer = new FileWriter(file)) {
+        try (Stream<String> lines = Files.lines(path)) {
 
             lines.forEach(line -> {
-                lineCount.getAndIncrement();
-
                 // Read and parse the line
                 String jsonString = line.substring(line.indexOf("{"));
                 try {
@@ -72,18 +61,11 @@ public class MainController {
 
                     // Persist using Repository
                     authorRepository.save(author);
-                    System.out.println("saved " + author.getName());
-                    uploadLineCount.getAndIncrement();
-                } catch (JSONException e) {
-                    errorLineCount.getAndIncrement();
+                } catch (JSONException ignored) {
                 }
             });
 
-            System.out.println("Total " + lineCount + " authors found");
-            System.out.println("Total " + uploadLineCount + " authors uploaded");
-            System.out.println("Total " + errorLineCount + " error lines found");
-
-            writer.write(authorDumpLocation + " was uploaded");
+            System.out.println(authorDumpLocation + " was uploaded");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -91,18 +73,9 @@ public class MainController {
 
     private void initWorks() {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
-
-        AtomicLong lineCount = new AtomicLong();
-        AtomicLong uploadLineCount = new AtomicLong();
-        AtomicLong errorLineCount = new AtomicLong();
-
         Path path = Paths.get(authorDumpLocation);
-        File file = new File("D:\\Coding\\BetterReads\\tempOutputForProcessedWorksFiles.txt");
-        try (Stream<String> lines = Files.lines(path);
-        FileWriter writer = new FileWriter(file)) {
+        try (Stream<String> lines = Files.lines(path)) {
             lines.forEach(line -> {
-                lineCount.getAndIncrement();
-
                 // Read and parse the line
                 String jsonString = line.substring(line.indexOf("{"));
                 try {
@@ -161,17 +134,10 @@ public class MainController {
 
                     // Persist using Repository
                     bookRepository.save(book);
-                    uploadLineCount.getAndIncrement();
-                } catch (JSONException | RuntimeException e) {
-                    errorLineCount.getAndIncrement();
+                } catch (JSONException ignored) {
                 }
             });
-
-            System.out.println("Total " + lineCount + " works found");
-            System.out.println("Total " + uploadLineCount + " works uploaded");
-            System.out.println("Total " + errorLineCount + " error lines found");
-
-            writer.write(worksDumpLocation + " was uploaded");
+            System.out.println(worksDumpLocation + " was uploaded");
         } catch (IOException e) {
             e.printStackTrace();
         }
