@@ -1,5 +1,13 @@
 package io.hrushik09.betterreadsdataloader;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import io.hrushik09.betterreadsdataloader.author.Author;
 import io.hrushik09.betterreadsdataloader.author.AuthorRepository;
 import io.hrushik09.betterreadsdataloader.book.Book;
@@ -12,7 +20,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import javax.annotation.PostConstruct;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,24 +42,40 @@ public class MainController {
     @Autowired
     BookRepository bookRepository;
 
-    @Value("${datadump.location.authors}")
-    private String authorDumpLocation;
+    @Value("${aws-s3-accesskey}")
+    private String accessKey;
 
-    @Value("${datadump.location.works}")
-    private String worksDumpLocation;
+    @Value("${aws-s3-secretkey}")
+    private String secretKey;
+
+    @Value("${aws-s3-bucket-name}")
+    private String bucketName;
+
+    @Value("${aws-s3-key-name}")
+    private String keyName;
 
     @PostConstruct
     public void start() {
-        initAuthors();
-//        initWorks();
+        AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+        AmazonS3 s3client = AmazonS3ClientBuilder
+                .standard()
+                .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                .withRegion(Regions.US_EAST_1)
+                .build();
+
+        S3Object object = s3client.getObject(new GetObjectRequest(bucketName, keyName));
+        InputStream objectData = object.getObjectContent();
+
+        initAuthors(objectData);
+//        initWorks(objectData);
     }
 
-    private void initAuthors() {
-        System.out.println("working on " + authorDumpLocation);
-        Path path = Paths.get(authorDumpLocation);
-        try (Stream<String> lines = Files.lines(path)) {
+    private void initAuthors(InputStream objectData) {
+        System.out.println("working on " + bucketName + " - " + keyName);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(objectData))) {
+            String line;
 
-            lines.forEach(line -> {
+            while ((line = reader.readLine()) != null) {
                 // Read and parse the line
                 String jsonString = line.substring(line.indexOf("{"));
                 try {
@@ -65,20 +92,22 @@ public class MainController {
                     authorRepository.save(author);
                 } catch (JSONException ignored) {
                 }
-            });
+            }
 
-            System.out.println(authorDumpLocation + " was uploaded");
+            System.out.println(bucketName + " - " + keyName + " was uploaded");
+            objectData.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void initWorks() {
-        System.out.println("working on " + worksDumpLocation);
+    private void initWorks(InputStream objectData) {
+        System.out.println("working on " + bucketName + " - " + keyName);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
-        Path path = Paths.get(worksDumpLocation);
-        try (Stream<String> lines = Files.lines(path)) {
-            lines.forEach(line -> {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(objectData))) {
+            String line;
+
+            while ((line = reader.readLine()) != null) {
                 // Read and parse the line
                 String jsonString = line.substring(line.indexOf("{"));
                 try {
@@ -140,8 +169,10 @@ public class MainController {
                     bookRepository.save(book);
                 } catch (JSONException ignored) {
                 }
-            });
-            System.out.println(worksDumpLocation + " was uploaded");
+            }
+
+            System.out.println(bucketName + " - " + keyName + " was uploaded");
+            objectData.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
