@@ -44,6 +44,7 @@ public class MainController {
     }
 
     private void initAuthors() {
+        System.out.println("working on " + authorDumpLocation);
         Path path = Paths.get(authorDumpLocation);
         try (Stream<String> lines = Files.lines(path)) {
 
@@ -59,6 +60,7 @@ public class MainController {
                     author.setPersonalName(jsonObject.optString("personal_name"));
                     author.setId(jsonObject.optString("key").replace("/authors/", ""));
 
+                    System.out.println("saved author " + author.getName());
                     // Persist using Repository
                     authorRepository.save(author);
                 } catch (JSONException ignored) {
@@ -72,8 +74,9 @@ public class MainController {
     }
 
     private void initWorks() {
+        System.out.println("working on " + worksDumpLocation);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
-        Path path = Paths.get(authorDumpLocation);
+        Path path = Paths.get(worksDumpLocation);
         try (Stream<String> lines = Files.lines(path)) {
             lines.forEach(line -> {
                 // Read and parse the line
@@ -132,6 +135,7 @@ public class MainController {
                         book.setAuthorNames(authorNames);
                     }
 
+                    System.out.println("saved book " + book.getName());
                     // Persist using Repository
                     bookRepository.save(book);
                 } catch (JSONException ignored) {
