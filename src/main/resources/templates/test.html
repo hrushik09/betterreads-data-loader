@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>BetterReads Data Loader</title>
+    <title>BetterReads Data Loader Test</title>
     <link
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
             rel="stylesheet"
@@ -21,15 +21,10 @@
     <div class="col-lg-6 mx-auto">
         <p class="lead mb-4">This application will upload the authors and books data to the Apache Cassandra database
             hosted at DataStax.<br><br>
-            Open Library provides monthly bulk data dumps for authors (around 3GB) and books (around 13GB). These <code>.txt</code>
-            files are split into smaller files and uploaded on AWS S3.
-            <br> The Test option below will establish connection with AWS, read <b>test</b> files for both authors and
-            works and upload that data to the Cassandra database.
-            <br> The Prod option below will establish connection with AWS, read <b>prod</b> files for both authors and
-            works and upload that data to the Cassandra database.</p>
+        </p>
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-            <a type="button" href="/test" class="btn btn-primary btn-lg px-4 gap-3">Test</a>
-            <a type="button" href="/prod" class="btn btn-outline-secondary btn-lg px-4">Prod</a>
+            <a type="button" href="" class="btn btn-primary btn-lg px-4 gap-3">Test</a>
+            <a type="button" href="" class="btn btn-outline-secondary btn-lg px-4">Prod</a>
         </div>
     </div>
 </div>
