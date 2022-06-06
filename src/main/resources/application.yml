@@ -9,3 +9,6 @@ spring:
       connection:
         connect-timeout: 10s
         init-query-timeout: 10s
+
+server:
+  port: ${PORT:8080}
