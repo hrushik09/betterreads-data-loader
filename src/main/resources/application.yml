@@ -1,0 +1,11 @@
+spring:
+  config:
+    import: "optional:secrets.properties"
+  data:
+    cassandra:
+      schema-action: create-if-not-exists
+      request:
+        timeout: 10s
+      connection:
+        connect-timeout: 10s
+        init-query-timeout: 10s
