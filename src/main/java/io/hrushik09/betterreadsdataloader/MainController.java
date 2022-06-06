@@ -7,7 +7,9 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import io.hrushik09.betterreadsdataloader.author.Author;
 import io.hrushik09.betterreadsdataloader.author.AuthorRepository;
 import io.hrushik09.betterreadsdataloader.book.Book;
@@ -24,35 +26,29 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Controller
 public class MainController {
     @Autowired
     AuthorRepository authorRepository;
-
     @Autowired
     BookRepository bookRepository;
 
     @Value("${aws-s3-accesskey}")
     private String accessKey;
-
     @Value("${aws-s3-secretkey}")
     private String secretKey;
-
-    @Value("${aws-s3-bucket-name}")
-    private String bucketName;
-
-    @Value("${aws-s3-key-name}")
-    private String keyName;
+    @Value("${aws-s3-authors-bucket}")
+    private String authorsBucket;
+    @Value("${aws-s3-works-bucket}")
+    private String worksBucket;
+    @Value("${aws-s3-test-bucket}")
+    private String testBucket;
 
     @PostConstruct
     public void start() {
@@ -63,15 +59,38 @@ public class MainController {
                 .withRegion(Regions.US_EAST_1)
                 .build();
 
-        S3Object object = s3client.getObject(new GetObjectRequest(bucketName, keyName));
-        InputStream objectData = object.getObjectContent();
-
-        initAuthors(objectData);
-//        initWorks(objectData);
+        test(s3client);
+//        upload(s3client);
     }
 
-    private void initAuthors(InputStream objectData) {
-        System.out.println("working on " + bucketName + " - " + keyName);
+    private void test(AmazonS3 s3client) {
+        S3Object authorsObject = s3client.getObject(new GetObjectRequest(testBucket, "test-authors.txt"));
+        InputStream authorsObjectData = authorsObject.getObjectContent();
+        initAuthors(authorsObjectData, testBucket, "test-authors.txt");
+
+        S3Object worksObject = s3client.getObject(new GetObjectRequest(testBucket, "test-works.txt"));
+        InputStream worksObjectData = worksObject.getObjectContent();
+        initWorks(worksObjectData, testBucket, "test-works.txt");
+    }
+
+    private void upload(AmazonS3 s3client) {
+        ObjectListing authorsObjectListing = s3client.listObjects(authorsBucket);
+        for (S3ObjectSummary os : authorsObjectListing.getObjectSummaries()) {
+            S3Object object = s3client.getObject(new GetObjectRequest(authorsBucket, os.getKey()));
+            InputStream objectData = object.getObjectContent();
+            initAuthors(objectData, authorsBucket, os.getKey());
+        }
+
+        ObjectListing worksObjectListing = s3client.listObjects(worksBucket);
+        for (S3ObjectSummary os : worksObjectListing.getObjectSummaries()) {
+            S3Object object = s3client.getObject(new GetObjectRequest(worksBucket, os.getKey()));
+            InputStream objectData = object.getObjectContent();
+            initWorks(objectData, worksBucket, os.getKey());
+        }
+    }
+
+    private void initAuthors(InputStream objectData, String bucketName, String keyName) {
+        System.out.println("\nWorking on bucket (" + bucketName + ") and key (" + keyName + ").\n");
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(objectData))) {
             String line;
 
@@ -87,22 +106,22 @@ public class MainController {
                     author.setPersonalName(jsonObject.optString("personal_name"));
                     author.setId(jsonObject.optString("key").replace("/authors/", ""));
 
-                    System.out.println("saved author " + author.getName());
+                    System.out.println("saved author: " + author.getName());
                     // Persist using Repository
                     authorRepository.save(author);
                 } catch (JSONException ignored) {
                 }
             }
 
-            System.out.println(bucketName + " - " + keyName + " was uploaded");
+            System.out.println("\nbucket (" + bucketName + ") and key (" + keyName + ") was uploaded.\n");
             objectData.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void initWorks(InputStream objectData) {
-        System.out.println("working on " + bucketName + " - " + keyName);
+    private void initWorks(InputStream objectData, String bucketName, String keyName) {
+        System.out.println("\nWorking on bucket (" + bucketName + ") and key (" + keyName + ").\n");
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(objectData))) {
             String line;
@@ -164,14 +183,14 @@ public class MainController {
                         book.setAuthorNames(authorNames);
                     }
 
-                    System.out.println("saved book " + book.getName());
+                    System.out.println("saved book: " + book.getName());
                     // Persist using Repository
                     bookRepository.save(book);
                 } catch (JSONException ignored) {
                 }
             }
 
-            System.out.println(bucketName + " - " + keyName + " was uploaded");
+            System.out.println("\nbucket (" + bucketName + ") and key (" + keyName + ") was uploaded.\n");
             objectData.close();
         } catch (IOException e) {
             e.printStackTrace();
