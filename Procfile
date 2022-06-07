@@ -1,1 +1,1 @@
-web: java -jar target/betterreads-data-loader-0.0.1-SNAPSHOT.jar -Dserver.port=$PORT
+worker: java -jar target/betterreads-data-loader-0.0.1-SNAPSHOT.jar -Dserver.port=$PORT
