@@ -59,8 +59,8 @@ public class MainController {
                 .withRegion(Regions.US_EAST_1)
                 .build();
 
-        test(s3client);
-//        upload(s3client);
+//        test(s3client);
+        upload(s3client);
     }
 
     private void test(AmazonS3 s3client) {
