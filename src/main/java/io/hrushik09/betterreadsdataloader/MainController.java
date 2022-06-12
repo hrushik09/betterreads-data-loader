@@ -49,6 +49,10 @@ public class MainController {
     private String worksBucket;
     @Value("${aws-s3-test-bucket}")
     private String testBucket;
+    @Value("${aws-s3-authors-key}")
+    private String authorsKey;
+    @Value("${aws-s3-works-key}")
+    private String worksKey;
 
     @PostConstruct
     public void start() {
@@ -60,7 +64,8 @@ public class MainController {
                 .build();
 
 //        test(s3client);
-        upload(s3client);
+        uploadAuthors(s3client);
+//        uploadWorks(s3client);
     }
 
     private void test(AmazonS3 s3client) {
@@ -73,20 +78,16 @@ public class MainController {
         initWorks(worksObjectData, testBucket, "test-works.txt");
     }
 
-    private void upload(AmazonS3 s3client) {
-        ObjectListing authorsObjectListing = s3client.listObjects(authorsBucket);
-        for (S3ObjectSummary os : authorsObjectListing.getObjectSummaries()) {
-            S3Object object = s3client.getObject(new GetObjectRequest(authorsBucket, os.getKey()));
-            InputStream objectData = object.getObjectContent();
-            initAuthors(objectData, authorsBucket, os.getKey());
-        }
+    private void uploadAuthors(AmazonS3 s3client) {
+        S3Object object = s3client.getObject(new GetObjectRequest(authorsBucket, authorsKey));
+        InputStream objectData = object.getObjectContent();
+        initAuthors(objectData, authorsBucket, authorsKey);
+    }
 
-        ObjectListing worksObjectListing = s3client.listObjects(worksBucket);
-        for (S3ObjectSummary os : worksObjectListing.getObjectSummaries()) {
-            S3Object object = s3client.getObject(new GetObjectRequest(worksBucket, os.getKey()));
-            InputStream objectData = object.getObjectContent();
-            initWorks(objectData, worksBucket, os.getKey());
-        }
+    private void uploadWorks(AmazonS3 s3client) {
+        S3Object object = s3client.getObject(new GetObjectRequest(worksBucket, worksKey));
+        InputStream objectData = object.getObjectContent();
+        initWorks(objectData, worksBucket, worksKey);
     }
 
     private void initAuthors(InputStream objectData, String bucketName, String keyName) {
@@ -196,4 +197,20 @@ public class MainController {
             e.printStackTrace();
         }
     }
+
+//    private void upload(AmazonS3 s3client) {
+//        ObjectListing authorsObjectListing = s3client.listObjects(authorsBucket);
+//        for (S3ObjectSummary os : authorsObjectListing.getObjectSummaries()) {
+//            S3Object object = s3client.getObject(new GetObjectRequest(authorsBucket, os.getKey()));
+//            InputStream objectData = object.getObjectContent();
+//            initAuthors(objectData, authorsBucket, os.getKey());
+//        }
+//
+//        ObjectListing worksObjectListing = s3client.listObjects(worksBucket);
+//        for (S3ObjectSummary os : worksObjectListing.getObjectSummaries()) {
+//            S3Object object = s3client.getObject(new GetObjectRequest(worksBucket, os.getKey()));
+//            InputStream objectData = object.getObjectContent();
+//            initWorks(objectData, worksBucket, os.getKey());
+//        }
+//    }
 }
