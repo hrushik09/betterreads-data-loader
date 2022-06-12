@@ -91,6 +91,7 @@ public class MainController {
     }
 
     private void initAuthors(InputStream objectData, String bucketName, String keyName) {
+        long count = 1L;
         System.out.println("\nWorking on bucket (" + bucketName + ") and key (" + keyName + ").\n");
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(objectData))) {
             String line;
@@ -107,7 +108,7 @@ public class MainController {
                     author.setPersonalName(jsonObject.optString("personal_name"));
                     author.setId(jsonObject.optString("key").replace("/authors/", ""));
 
-                    System.out.println("saved author: " + author.getName());
+                    System.out.println("saved author " + count++ + ": " + author.getName());
                     // Persist using Repository
                     authorRepository.save(author);
                 } catch (JSONException ignored) {
@@ -122,6 +123,7 @@ public class MainController {
     }
 
     private void initWorks(InputStream objectData, String bucketName, String keyName) {
+        long count = 1L;
         System.out.println("\nWorking on bucket (" + bucketName + ") and key (" + keyName + ").\n");
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(objectData))) {
@@ -184,7 +186,7 @@ public class MainController {
                         book.setAuthorNames(authorNames);
                     }
 
-                    System.out.println("saved book: " + book.getName());
+                    System.out.println("saved book " + count++ + ": " + book.getName());
                     // Persist using Repository
                     bookRepository.save(book);
                 } catch (JSONException ignored) {
