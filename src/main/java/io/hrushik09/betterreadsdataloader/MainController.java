@@ -64,8 +64,8 @@ public class MainController {
                 .build();
 
 //        test(s3client);
-        uploadAuthors(s3client);
-//        uploadWorks(s3client);
+//        uploadAuthors(s3client);
+        uploadWorks(s3client);
     }
 
     private void test(AmazonS3 s3client) {
