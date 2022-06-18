@@ -175,7 +175,7 @@ public class MainController {
                     JSONArray authorsJSONArr = jsonObject.optJSONArray("authors");
                     if (authorsJSONArr != null) {
                         List<String> authorIds = new ArrayList<>();
-                        for (int i = 0; i < authorsJSONArr.length(); i++) {
+                        for (int i = 0; i < 15 && i < authorsJSONArr.length(); i++) {
                             String authorId = authorsJSONArr.getJSONObject(i)
                                     .getJSONObject("author")
                                     .getString("key")
