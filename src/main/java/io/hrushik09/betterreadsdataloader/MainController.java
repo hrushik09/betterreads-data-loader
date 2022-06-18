@@ -165,7 +165,7 @@ public class MainController {
                     JSONArray coversJSONArr = jsonObject.optJSONArray("covers");
                     if (coversJSONArr != null) {
                         List<String> coverIds = new ArrayList<>();
-                        for (int i = 0; i < coversJSONArr.length(); i++) {
+                        for (int i = 0; i < 15 && i < coversJSONArr.length(); i++) {
                             coverIds.add(coversJSONArr.getString(i));
                         }
                         book.setCoverIds(coverIds);
