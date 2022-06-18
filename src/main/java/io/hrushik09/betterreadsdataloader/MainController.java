@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -199,7 +200,7 @@ public class MainController {
                     bookRepository.save(book);
                     count++;
 //                    System.out.println("saved book " + count++ + ": " + book.getName());
-                } catch (JSONException ignored) {
+                } catch (JSONException | DateTimeParseException ignored) {
                 }
             }
 
