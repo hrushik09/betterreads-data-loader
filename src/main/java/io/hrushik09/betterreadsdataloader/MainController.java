@@ -69,6 +69,7 @@ public class MainController {
     }
 
     private void test(AmazonS3 s3client) {
+        System.out.println("Test run");
         S3Object authorsObject = s3client.getObject(new GetObjectRequest(testBucket, "test-authors.txt"));
         InputStream authorsObjectData = authorsObject.getObjectContent();
         initAuthors(authorsObjectData, testBucket, "test-authors.txt");
@@ -79,12 +80,14 @@ public class MainController {
     }
 
     private void uploadAuthors(AmazonS3 s3client) {
+        System.out.println("Uploading authors");
         S3Object object = s3client.getObject(new GetObjectRequest(authorsBucket, authorsKey));
         InputStream objectData = object.getObjectContent();
         initAuthors(objectData, authorsBucket, authorsKey);
     }
 
     private void uploadWorks(AmazonS3 s3client) {
+        System.out.println("Uploading works");
         S3Object object = s3client.getObject(new GetObjectRequest(worksBucket, worksKey));
         InputStream objectData = object.getObjectContent();
         initWorks(objectData, worksBucket, worksKey);
@@ -108,15 +111,15 @@ public class MainController {
                     author.setPersonalName(jsonObject.optString("personal_name"));
                     author.setId(jsonObject.optString("key").replace("/authors/", ""));
 
-                    System.out.println("saved author " + count++ + ": " + author.getName());
                     // Persist using Repository
                     authorRepository.save(author);
+                    System.out.println("saved author " + count++ + ": " + author.getName());
                 } catch (JSONException ignored) {
                 }
             }
 
-            System.out.println("\nbucket (" + bucketName + ") and key (" + keyName + ") was uploaded.\n");
             objectData.close();
+            System.out.println("\nbucket (" + bucketName + ") and key (" + keyName + ") was uploaded.\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -186,15 +189,15 @@ public class MainController {
                         book.setAuthorNames(authorNames);
                     }
 
-                    System.out.println("saved book " + count++ + ": " + book.getName());
                     // Persist using Repository
                     bookRepository.save(book);
+                    System.out.println("saved book " + count++ + ": " + book.getName());
                 } catch (JSONException ignored) {
                 }
             }
 
-            System.out.println("\nbucket (" + bucketName + ") and key (" + keyName + ") was uploaded.\n");
             objectData.close();
+            System.out.println("\nbucket (" + bucketName + ") and key (" + keyName + ") was uploaded.\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
