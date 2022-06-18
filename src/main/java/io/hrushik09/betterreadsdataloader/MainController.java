@@ -7,9 +7,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import io.hrushik09.betterreadsdataloader.author.Author;
 import io.hrushik09.betterreadsdataloader.author.AuthorRepository;
 import io.hrushik09.betterreadsdataloader.book.Book;
@@ -70,32 +68,39 @@ public class MainController {
 
     private void test(AmazonS3 s3client) {
         System.out.println("Test run");
+
+        System.out.println("\nUploading authors");
         S3Object authorsObject = s3client.getObject(new GetObjectRequest(testBucket, "test-authors.txt"));
         InputStream authorsObjectData = authorsObject.getObjectContent();
         initAuthors(authorsObjectData, testBucket, "test-authors.txt");
+        System.out.println("Uploaded authors");
 
+        System.out.println("\nUploading works");
         S3Object worksObject = s3client.getObject(new GetObjectRequest(testBucket, "test-works.txt"));
         InputStream worksObjectData = worksObject.getObjectContent();
         initWorks(worksObjectData, testBucket, "test-works.txt");
+        System.out.println("Uploaded works");
     }
 
     private void uploadAuthors(AmazonS3 s3client) {
-        System.out.println("Uploading authors");
+        System.out.println("\nUploading authors");
         S3Object object = s3client.getObject(new GetObjectRequest(authorsBucket, authorsKey));
         InputStream objectData = object.getObjectContent();
         initAuthors(objectData, authorsBucket, authorsKey);
+        System.out.println("Uploaded authors");
     }
 
     private void uploadWorks(AmazonS3 s3client) {
-        System.out.println("Uploading works");
+        System.out.println("\nUploading works");
         S3Object object = s3client.getObject(new GetObjectRequest(worksBucket, worksKey));
         InputStream objectData = object.getObjectContent();
         initWorks(objectData, worksBucket, worksKey);
+        System.out.println("Uploaded works");
     }
 
     private void initAuthors(InputStream objectData, String bucketName, String keyName) {
         long count = 1L;
-        System.out.println("\nWorking on bucket (" + bucketName + ") and key (" + keyName + ").\n");
+        System.out.printf("%nWorking on bucket (%s) and key (%s)%n%n", bucketName, keyName);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(objectData))) {
             String line;
 
@@ -113,13 +118,14 @@ public class MainController {
 
                     // Persist using Repository
                     authorRepository.save(author);
-                    System.out.println("saved author " + count++ + ": " + author.getName());
+                    count++;
+//                    System.out.println("saved author " + count++ + ": " + author.getName());
                 } catch (JSONException ignored) {
                 }
             }
 
             objectData.close();
-            System.out.println("\nbucket (" + bucketName + ") and key (" + keyName + ") was uploaded.\n");
+            System.out.printf("%nBucket (%s) and key (%s) : total %d lines uploaded%n%n", bucketName, keyName, count);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -127,7 +133,7 @@ public class MainController {
 
     private void initWorks(InputStream objectData, String bucketName, String keyName) {
         long count = 1L;
-        System.out.println("\nWorking on bucket (" + bucketName + ") and key (" + keyName + ").\n");
+        System.out.printf("%nWorking on bucket (%s) and key (%s)%n%n", bucketName, keyName);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(objectData))) {
             String line;
@@ -191,13 +197,14 @@ public class MainController {
 
                     // Persist using Repository
                     bookRepository.save(book);
-                    System.out.println("saved book " + count++ + ": " + book.getName());
+                    count++;
+//                    System.out.println("saved book " + count++ + ": " + book.getName());
                 } catch (JSONException ignored) {
                 }
             }
 
             objectData.close();
-            System.out.println("\nbucket (" + bucketName + ") and key (" + keyName + ") was uploaded.\n");
+            System.out.printf("%nBucket (%s) and key (%s) : total %d lines uploaded%n%n", bucketName, keyName, count);
         } catch (IOException e) {
             e.printStackTrace();
         }
