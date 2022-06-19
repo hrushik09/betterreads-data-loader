@@ -119,8 +119,7 @@ public class MainController {
 
                     // Persist using Repository
                     authorRepository.save(author);
-                    count++;
-//                    System.out.println("saved author " + count++ + ": " + author.getName());
+                    System.out.println("saved author " + count++ + ": " + author.getName());
                 } catch (JSONException ignored) {
                 }
             }
@@ -198,8 +197,7 @@ public class MainController {
 
                     // Persist using Repository
                     bookRepository.save(book);
-                    count++;
-//                    System.out.println("saved book " + count++ + ": " + book.getName());
+                    System.out.println("saved book " + count++ + ": " + book.getName());
                 } catch (JSONException | DateTimeParseException ignored) {
                 }
             }
