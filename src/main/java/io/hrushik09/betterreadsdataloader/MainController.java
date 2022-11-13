@@ -62,9 +62,9 @@ public class MainController {
                 .withRegion(Regions.US_EAST_1)
                 .build();
 
-//        test(s3client);
+        test(s3client);
 //        uploadAuthors(s3client);
-        uploadWorks(s3client);
+//        uploadWorks(s3client);
     }
 
     private void test(AmazonS3 s3client) {
