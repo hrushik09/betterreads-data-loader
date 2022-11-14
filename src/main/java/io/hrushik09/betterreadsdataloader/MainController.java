@@ -66,8 +66,8 @@ public class MainController {
                 .withRegion(Regions.US_EAST_1)
                 .build();
 
-        test(s3client);
-//        upload(s3client);
+//        test(s3client);
+        upload(s3client);
 
 //        uploadAuthors(s3client);
 //        uploadWorks(s3client);
