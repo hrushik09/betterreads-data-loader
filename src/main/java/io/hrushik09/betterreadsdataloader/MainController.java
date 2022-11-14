@@ -66,8 +66,8 @@ public class MainController {
                 .withRegion(Regions.US_EAST_1)
                 .build();
 
-//        test(s3client);
-        upload(s3client);
+        test(s3client);
+//        upload(s3client);
 
 //        uploadAuthors(s3client);
 //        uploadWorks(s3client);
@@ -95,7 +95,7 @@ public class MainController {
 
     private void initAuthors(InputStream objectData, String bucketName, String keyName) {
         long count = 1L;
-        System.out.printf("\nWorking on bucket (%s) and key (%s)\n\n", bucketName, keyName);
+        System.out.printf("Working on bucket (%s) and key (%s)", bucketName, keyName);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(objectData))) {
             String line;
 
@@ -113,13 +113,14 @@ public class MainController {
 
                     // Persist using Repository
                     authorRepository.save(author);
-                    System.out.println("saved author " + count++ + ": " + author.getName());
+                    count++;
+//                    System.out.println("saved author " + count + ": " + author.getName());
                 } catch (JSONException ignored) {
                 }
             }
 
             objectData.close();
-            System.out.printf("\nBucket (%s) and key (%s) : total %d lines uploaded\n\n", bucketName, keyName, count);
+            System.out.printf("Bucket (%s) and key (%s) : total %d lines uploaded", bucketName, keyName, count);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -127,7 +128,7 @@ public class MainController {
 
     private void initWorks(InputStream objectData, String bucketName, String keyName) {
         long count = 1L;
-        System.out.printf("\nWorking on bucket (%s) and key (%s)\n\n", bucketName, keyName);
+        System.out.printf("Working on bucket (%s) and key (%s)", bucketName, keyName);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(objectData))) {
             String line;
@@ -191,13 +192,14 @@ public class MainController {
 
                     // Persist using Repository
                     bookRepository.save(book);
-                    System.out.println("saved book " + count++ + ": " + book.getName());
+                    count++;
+//                    System.out.println("saved book " + count + ": " + book.getName());
                 } catch (JSONException | DateTimeParseException ignored) {
                 }
             }
 
             objectData.close();
-            System.out.printf("\nBucket (%s) and key (%s) : total %d lines uploaded\n\n", bucketName, keyName, count);
+            System.out.printf("Bucket (%s) and key (%s) : total %d lines uploaded", bucketName, keyName, count);
         } catch (IOException e) {
             e.printStackTrace();
         }
