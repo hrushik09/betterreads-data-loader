@@ -95,7 +95,7 @@ public class MainController {
 
     private void initAuthors(InputStream objectData, String bucketName, String keyName) {
         long count = 1L;
-        System.out.printf("Working on bucket (%s) and key (%s)", bucketName, keyName);
+        System.out.printf("Working on bucket (%s) and key (%s)\n", bucketName, keyName);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(objectData))) {
             String line;
 
@@ -120,7 +120,7 @@ public class MainController {
             }
 
             objectData.close();
-            System.out.printf("Bucket (%s) and key (%s) : total %d lines uploaded", bucketName, keyName, count);
+            System.out.printf("Bucket (%s) and key (%s) : total %d lines uploaded\n", bucketName, keyName, count);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -128,7 +128,7 @@ public class MainController {
 
     private void initWorks(InputStream objectData, String bucketName, String keyName) {
         long count = 1L;
-        System.out.printf("Working on bucket (%s) and key (%s)", bucketName, keyName);
+        System.out.printf("Working on bucket (%s) and key (%s)\n", bucketName, keyName);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(objectData))) {
             String line;
@@ -199,7 +199,7 @@ public class MainController {
             }
 
             objectData.close();
-            System.out.printf("Bucket (%s) and key (%s) : total %d lines uploaded", bucketName, keyName, count);
+            System.out.printf("Bucket (%s) and key (%s) : total %d lines uploaded\n", bucketName, keyName, count);
         } catch (IOException e) {
             e.printStackTrace();
         }
