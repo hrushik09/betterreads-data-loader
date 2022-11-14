@@ -66,36 +66,41 @@ public class MainController {
                 .withRegion(Regions.US_EAST_1)
                 .build();
 
-//        test(s3client);
-        upload(s3client);
-
-//        uploadAuthors(s3client);
-//        uploadWorks(s3client);
+        uploadAuthors(s3client);
+        uploadWorks(s3client);
     }
 
-    private void upload(AmazonS3 s3client) {
-        System.out.println("\nUploading authors");
+    private void uploadAuthors(AmazonS3 s3client) {
         ObjectListing authorsObjectListing = s3client.listObjects(authorsBucket);
+        List<String> authorsKeyList = new ArrayList<>();
         for (S3ObjectSummary os : authorsObjectListing.getObjectSummaries()) {
-            S3Object object = s3client.getObject(new GetObjectRequest(authorsBucket, os.getKey()));
-            InputStream objectData = object.getObjectContent();
-            initAuthors(objectData, authorsBucket, os.getKey());
+            authorsKeyList.add(os.getKey());
         }
-        System.out.println("\nUploaded authors");
 
-        System.out.println("\nUploading works");
-        ObjectListing worksObjectListing = s3client.listObjects(worksBucket);
-        for (S3ObjectSummary os : worksObjectListing.getObjectSummaries()) {
-            S3Object object = s3client.getObject(new GetObjectRequest(worksBucket, os.getKey()));
+        for (String authorsKey : authorsKeyList) {
+            S3Object object = s3client.getObject(new GetObjectRequest(authorsBucket, authorsKey));
             InputStream objectData = object.getObjectContent();
-            initWorks(objectData, worksBucket, os.getKey());
+            initAuthors(objectData, authorsBucket, authorsKey);
         }
-        System.out.println("\nUploaded works");
+    }
+
+    private void uploadWorks(AmazonS3 s3client) {
+        ObjectListing worksObjectListing = s3client.listObjects(worksBucket);
+        List<String> worksKeyList = new ArrayList<>();
+        for (S3ObjectSummary os : worksObjectListing.getObjectSummaries()) {
+            worksKeyList.add(os.getKey());
+        }
+
+        for (String worksKey : worksKeyList) {
+            S3Object object = s3client.getObject(new GetObjectRequest(worksBucket, worksKey));
+            InputStream objectData = object.getObjectContent();
+            initWorks(objectData, worksBucket, worksKey);
+        }
     }
 
     private void initAuthors(InputStream objectData, String bucketName, String keyName) {
+        System.out.println("Uploading Authors: bucket - " + bucketName + ", key - " + keyName);
         long count = 1L;
-        System.out.printf("Working on bucket (%s) and key (%s)\n", bucketName, keyName);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(objectData))) {
             String line;
 
@@ -113,22 +118,21 @@ public class MainController {
 
                     // Persist using Repository
                     authorRepository.save(author);
+                    System.out.println("Added Author " + count + ": bucket - " + bucketName + ", key - " + keyName + ", Author - " + author.getName());
                     count++;
-//                    System.out.println("saved author " + count + ": " + author.getName());
                 } catch (JSONException ignored) {
                 }
             }
 
             objectData.close();
-            System.out.printf("Bucket (%s) and key (%s) : total %d lines uploaded\n", bucketName, keyName, count);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void initWorks(InputStream objectData, String bucketName, String keyName) {
+        System.out.println("Uploading Works: bucket - " + bucketName + ", key - " + keyName);
         long count = 1L;
-        System.out.printf("Working on bucket (%s) and key (%s)\n", bucketName, keyName);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(objectData))) {
             String line;
@@ -192,48 +196,25 @@ public class MainController {
 
                     // Persist using Repository
                     bookRepository.save(book);
+                    System.out.println("Added Work " + count + ": bucket - " + bucketName + ", key - " + keyName + ", Work - " + book.getName());
                     count++;
-//                    System.out.println("saved book " + count + ": " + book.getName());
                 } catch (JSONException | DateTimeParseException ignored) {
                 }
             }
 
             objectData.close();
-            System.out.printf("Bucket (%s) and key (%s) : total %d lines uploaded\n", bucketName, keyName, count);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void test(AmazonS3 s3client) {
-        System.out.println("Test run");
-
-        System.out.println("\nUploading authors");
         S3Object authorsObject = s3client.getObject(new GetObjectRequest(testBucket, "test-authors.txt"));
         InputStream authorsObjectData = authorsObject.getObjectContent();
         initAuthors(authorsObjectData, testBucket, "test-authors.txt");
-        System.out.println("\nUploaded authors");
 
-        System.out.println("\nUploading works");
         S3Object worksObject = s3client.getObject(new GetObjectRequest(testBucket, "test-works.txt"));
         InputStream worksObjectData = worksObject.getObjectContent();
         initWorks(worksObjectData, testBucket, "test-works.txt");
-        System.out.println("\nUploaded works");
     }
-
-//    private void uploadAuthors(AmazonS3 s3client) {
-//        System.out.println("\nUploading authors");
-//        S3Object object = s3client.getObject(new GetObjectRequest(authorsBucket, authorsKey));
-//        InputStream objectData = object.getObjectContent();
-//        initAuthors(objectData, authorsBucket, authorsKey);
-//        System.out.println("\nUploaded authors");
-//    }
-//
-//    private void uploadWorks(AmazonS3 s3client) {
-//        System.out.println("\nUploading works");
-//        S3Object object = s3client.getObject(new GetObjectRequest(worksBucket, worksKey));
-//        InputStream objectData = object.getObjectContent();
-//        initWorks(objectData, worksBucket, worksKey);
-//        System.out.println("\nUploaded works");
-//    }
 }
